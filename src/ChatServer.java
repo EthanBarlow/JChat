@@ -96,11 +96,31 @@ Will handle all the message sending, receiving and processing
                 //out.println(userName + ": ");
                 msg = in.nextLine();
 
-                //parsing the message
-                Set<String> recipient = new HashSet<String>();
+                //processing the message
+                String[] msgParts = msg.split("%");
+                //the last element in msgParts should contain the actual message
+                for (String s:msgParts) {
+                    System.out.println(s);
+                }
 
-                System.out.println(msg);
-                out.println(userName+ " says " + msg);
+                Set<String> recipient = new HashSet<String>();
+                for(String user: msgParts)
+                {
+                    if(USERMAP.containsKey(user))
+                        recipient.add(user);
+                        //System.out.println("user found!!!!!!!!");
+                    System.out.println(user);
+                }
+                for(String s: recipient)
+                    System.out.println(s);
+
+                System.out.println("username " + userName);
+                System.out.println(msgParts[msgParts.length-1]);
+
+                sendMessage(recipient, userName, msgParts[msgParts.length-1]);
+
+                System.out.println("still in the loop..." + msg);
+                //out.println(userName+ " says " + msg);
             }
         }//end run method
 
@@ -113,22 +133,32 @@ Will handle all the message sending, receiving and processing
          */
         private void sendMessage(Set<String> recipientSet, String sender, String message)  //------------------------------ DEBUG
         {
+            System.out.println("In send message before any processing");
             PrintWriter tempWrite;
+            System.out.println("set's size: " + recipientSet.size());
             for(String recipient: recipientSet)
             {
-                if(!recipient.equals(sender))//don't send this message to the sender
+                System.out.println("in for recipientSet loop");
+               // if(!recipient.equals(sender))//don't send this message to the sender
                 try
                 {
+                    /*System.out.println("In try block");
+                    Socket partner = (Socket) USERMAP.get(recipient);
+                    PrintWriter partnerOut = new PrintWriter(partner.getOutputStream(), true);
+                    partnerOut.println(this.getName() + " : " + message);*/
                     tempWrite = new PrintWriter(USERMAP.get(recipient).getOutputStream(), true);//autoFlush is true
                     tempWrite.println(sender + ": " +message);
+                    System.out.println("In sendMessage method " +sender + ": " + message);
                 }
                 catch (IOException e)
                 {
+                    System.out.println("In catch block");
                     e.printStackTrace();
                     System.out.println("The message from " + sender + " could not be sent to " + recipient);
                 }
-
+                System.out.println("end of for loop");
             }
+            System.out.println("end of sendMessage method");
         }
 
 

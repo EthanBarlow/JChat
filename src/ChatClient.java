@@ -80,13 +80,13 @@ public class ChatClient
             while(true)
             {
                 msgFromServer=serverInput.nextLine();
-                if(msgFromServer.contains("--@username"))
+               /* if(msgFromServer.contains("--@username"))
                 {
                     String temp = msgFromServer.substring(new String("--@username").length());
                     //System.out.println("Your username!!!!!!!!!!!!================== "+temp);
                     USERNAME=temp;
                     continue;//skips the next print statement so that the user's own name isn't printed as a chat message
-                }
+                }*/
                 System.out.println(msgFromServer);
             }//end while loop
         }
@@ -108,8 +108,9 @@ public class ChatClient
         {
             while(true)
             {
-                System.out.print(USERNAME+": ");
-                lineToServer.println(keyboard.nextLine());
+                String msgToSend=keyboard.nextLine();
+                //System.out.print(USERNAME+": ");
+                lineToServer.println(msgToSend);
             }
         }
 
