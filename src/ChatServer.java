@@ -3,7 +3,7 @@ This is the chat server class that will setup all connections with clients
 
 This class needs the following attributes:
     ServerSocket - to listen for new connections
-    Map<String username, ClientThread client>
+    Map<String, Socket>
 
 
 
@@ -53,7 +53,7 @@ Will handle all the message sending, receiving and processing
         private Scanner in; //used to take in messages from the actual client
         private String userName; //the username of the client that this ClientThread is interacting with
 
-        /*Constructor taking in a Socket object and a map object.
+        /*Constructor taking in a Socket object.
             The map will be used to send a list of online users
         */
         public ClientThread(Socket s) throws Exception
@@ -73,10 +73,12 @@ Will handle all the message sending, receiving and processing
             {
                 out.println("Please enter a username starting with '@': ");
                 userName = in.nextLine();
-                //userName must not already be in the map, and the userName must contain "@"
-                if (!USERMAP.keySet().contains(userName) && userName.contains("@"))
+                /*userName must not already be in the map, and the userName must contain "@".
+                It cannot == "@" or contain "@server" (
+                this is reserved for messages that the server itself will send to clients)*/
+                if (!USERMAP.keySet().contains(userName) && userName.contains("@") && !userName.equals("@") && !userName.contains("@server"))
                 {
-                    out.println("Successful connection!");
+                    //out.println("Successful connection!");
                     break;
                 }
                 out.println("Invalid username...");
@@ -84,18 +86,51 @@ Will handle all the message sending, receiving and processing
             System.out.println("Listening for messages");
 
             USERMAP.put(userName, client);
+            sendMessage(USERMAP.keySet(), "@server", userName + " is now available to chat!");
             System.out.println(USERMAP);
 
             while(true)//waiting for input from the client
             {
                 System.out.println("In the waiting loop");
                 String msg="";
-                out.println(userName + ": ");
+                //out.println(userName + ": ");
                 msg = in.nextLine();
+
+                //parsing the message
+                Set<String> recipient = new HashSet<String>();
+
                 System.out.println(msg);
                 out.println(userName+ " says " + msg);
             }
         }//end run method
+
+        /**
+         * This method will loop through the recipientSet to send a message to each user in the set.
+         * The loop will access the input stream of each recipient in the set using a getter method to send the message
+         * @param recipientSet The set of users to receive the message.
+         * @param sender The user sending the message.
+         * @param message The message to be sent.
+         */
+        private void sendMessage(Set<String> recipientSet, String sender, String message)  //------------------------------ DEBUG
+        {
+            PrintWriter tempWrite;
+            for(String recipient: recipientSet)
+            {
+                if(!recipient.equals(sender))//don't send this message to the sender
+                try
+                {
+                    tempWrite = new PrintWriter(USERMAP.get(recipient).getOutputStream(), true);//autoFlush is true
+                    tempWrite.println(sender + ": " +message);
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                    System.out.println("The message from " + sender + " could not be sent to " + recipient);
+                }
+
+            }
+        }
+
 
     }//end ClientThread class
 
