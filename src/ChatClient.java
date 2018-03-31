@@ -23,12 +23,14 @@ public class ChatClient
             //used for keyboard input
             Scanner keyboard = new Scanner(System.in);
 
-            while(keyboard.hasNextLine())
+            while(true)
             {
+                System.out.println(input.nextLine());
                 message = keyboard.nextLine();
 
                 out.println(message);
-                System.out.println("Your message echoed back by the server: " + input.nextLine());
+                //System.out.println("Your message echoed back by the server: " + input.nextLine());
+                System.out.println(input.nextLine());
             }
 
             /*while(true)
