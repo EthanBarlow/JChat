@@ -90,7 +90,9 @@ Will handle all the message sending, receiving and processing
                     "for multiuser message:\n\"@username%@username%...usernames...%message\"\n\n" +
                     "Have fun!");
 
+            //alert the other users that this particular user is now online
             sendMessage(USERMAP.keySet(), "@server", userName + " is now available to chat!");
+            listUsers();
             System.out.println(USERMAP);
 
             while(true)//waiting for input from the client
@@ -159,7 +161,7 @@ Will handle all the message sending, receiving and processing
             System.out.println("end of sendMessage method");
         }
 
- private void sendMessage(String recip, String sender, String message)
+    private void sendMessage(String recip, String sender, String message)
         {
             System.out.println("In alternatice send message before any processing");
             PrintWriter tempWrite;
@@ -182,6 +184,19 @@ Will handle all the message sending, receiving and processing
             System.out.println("end of for loop");
         }//end alternative sendMessage method
 
+     //sends a message with the list of users currently online to this user
+     private void listUsers()
+     {
+         String allUsers="Here is a list of all the users that are online: \n";
+         for(String str: USERMAP.keySet())
+         {
+             if(!str.equals(userName))
+                 allUsers+= "\t" + str + "\n";
+         }
+         sendMessage(userName, "@server", allUsers);
+     }
+
     }//end ClientThread class
+
 
 }//end class main
