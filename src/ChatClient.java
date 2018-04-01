@@ -13,48 +13,19 @@ public class ChatClient
     {
         try
         {
+            String message="";
+
             //the socket object that will connect to the server
             Socket server = new Socket("148.137.223.190", 4336);
             //sends messages out to the server, use true as a parameter to make sure that the stream auto-flushes
             PrintWriter out = new PrintWriter(server.getOutputStream(), true);
             //receives messages from the server
             Scanner input = new Scanner(server.getInputStream());
-
-            String message="";
-
             //used for keyboard input
             Scanner keyboard = new Scanner(System.in);
 
-
             ServerResponse sr = new ServerResponse(input);
             KeyboardThenSend kts = new KeyboardThenSend(keyboard,out);
-
-            /*while(true)
-            {
-
-                //System.out.println(input.nextLine());
-                message = keyboard.nextLine();
-
-                out.println(message);
-                //System.out.println("Your message echoed back by the server: " + input.nextLine());
-                //System.out.println(input.nextLine());
-            }
-*/
-            /*while(true)
-            {
-                System.out.println("From the server: "+input.nextLine());
-
-                if(keyboard.hasNextLine())
-                {
-                    message = keyboard.nextLine();
-
-                    //send the message to the server
-                    out.println(message);
-                    //get a response back from the server
-                }
-            }*/
-
-           // System.out.println("Connected to server: " + server.getInetAddress());
         }
         catch (Exception e)
         {
@@ -62,7 +33,7 @@ public class ChatClient
         }
     }//end main method
 
-    //Three classes that extend the Thread class: one for server input, one for keyboard input, and one for client output
+    //Two classes that extend the Thread class: one for server input, one for keyboard input and for client output
 
     //This class will handle received messages from the server
     private static class ServerResponse extends Thread
@@ -80,19 +51,12 @@ public class ChatClient
             while(true)
             {
                 msgFromServer=serverInput.nextLine();
-               /* if(msgFromServer.contains("--@username"))
-                {
-                    String temp = msgFromServer.substring(new String("--@username").length());
-                    //System.out.println("Your username!!!!!!!!!!!!================== "+temp);
-                    USERNAME=temp;
-                    continue;//skips the next print statement so that the user's own name isn't printed as a chat message
-                }*/
                 System.out.println(msgFromServer);
             }//end while loop
         }
-    }
+    }//end ServerResponse class
 
-    //This class will handle keyboard input
+    //This class will handle keyboard input and sending messages
     private static class KeyboardThenSend extends Thread
     {
         Scanner keyboard;
@@ -102,19 +66,17 @@ public class ChatClient
             keyboard=i;
             lineToServer=pw;
             this.start();
-        }
+        }//end constructor
 
         public void run()
         {
             while(true)
             {
                 String msgToSend=keyboard.nextLine();
-                //System.out.print(USERNAME+": ");
                 lineToServer.println(msgToSend);
-            }
-        }
-
-    }
+            }//end while loop
+        }//end run method
+    }//end KeyboardThenSend class
 
 
 

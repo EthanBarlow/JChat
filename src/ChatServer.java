@@ -77,15 +77,19 @@ Will handle all the message sending, receiving and processing
                 It cannot == "@" or contain "@server" (
                 this is reserved for messages that the server itself will send to clients)*/
                 if (!USERMAP.keySet().contains(userName) && userName.contains("@") && !userName.equals("@") && !userName.contains("@server"))
-                {
-                    //out.println("Successful connection!");
                     break;
-                }
+
                 out.println("Invalid username...");
             }//end while loop
             System.out.println("Listening for messages");
 
             USERMAP.put(userName, client);
+
+            sendMessage(userName, "@server", "\n\n--------Welcome to JChat!--------\nTo " +
+                    "send a message to someone use the following format:\n\"@username%message\"\nand " +
+                    "for multiuser message:\n\"@username%@username%...usernames...%message\"\n\n" +
+                    "Have fun!");
+
             sendMessage(USERMAP.keySet(), "@server", userName + " is now available to chat!");
             System.out.println(USERMAP);
 
@@ -93,7 +97,6 @@ Will handle all the message sending, receiving and processing
             {
                 System.out.println("In the waiting loop");
                 String msg="";
-                //out.println(userName + ": ");
                 msg = in.nextLine();
 
                 //processing the message
@@ -108,7 +111,6 @@ Will handle all the message sending, receiving and processing
                 {
                     if(USERMAP.containsKey(user))
                         recipient.add(user);
-                        //System.out.println("user found!!!!!!!!");
                     System.out.println(user);
                 }
                 for(String s: recipient)
@@ -120,7 +122,6 @@ Will handle all the message sending, receiving and processing
                 sendMessage(recipient, userName, msgParts[msgParts.length-1]);
 
                 System.out.println("still in the loop..." + msg);
-                //out.println(userName+ " says " + msg);
             }
         }//end run method
 
@@ -131,7 +132,7 @@ Will handle all the message sending, receiving and processing
          * @param sender The user sending the message.
          * @param message The message to be sent.
          */
-        private void sendMessage(Set<String> recipientSet, String sender, String message)  //------------------------------ DEBUG
+        private void sendMessage(Set<String> recipientSet, String sender, String message)
         {
             System.out.println("In send message before any processing");
             PrintWriter tempWrite;
@@ -142,12 +143,10 @@ Will handle all the message sending, receiving and processing
                // if(!recipient.equals(sender))//don't send this message to the sender
                 try
                 {
-                    /*System.out.println("In try block");
+                    System.out.println("In try block");
                     Socket partner = (Socket) USERMAP.get(recipient);
                     PrintWriter partnerOut = new PrintWriter(partner.getOutputStream(), true);
-                    partnerOut.println(this.getName() + " : " + message);*/
-                    tempWrite = new PrintWriter(USERMAP.get(recipient).getOutputStream(), true);//autoFlush is true
-                    tempWrite.println(sender + ": " +message);
+                    partnerOut.println(sender + " : " + message);
                     System.out.println("In sendMessage method " +sender + ": " + message);
                 }
                 catch (IOException e)
@@ -161,6 +160,28 @@ Will handle all the message sending, receiving and processing
             System.out.println("end of sendMessage method");
         }
 
+ private void sendMessage(String recip, String sender, String message)
+        {
+            System.out.println("In alternatice send message before any processing");
+            PrintWriter tempWrite;
+
+            try
+            {
+                System.out.println("In try block");
+                Socket partner = (Socket) USERMAP.get(recip);
+                PrintWriter partnerOut = new PrintWriter(partner.getOutputStream(), true);
+                partnerOut.println(sender + " : " + message);
+                System.out.println("In sendMessage method " +sender + ": " + message);
+            }
+            catch (IOException e)
+            {
+                System.out.println("In catch block");
+                e.printStackTrace();
+                System.out.println("The message from " + sender + " could not be sent to " + recip);
+            }
+
+            System.out.println("end of for loop");
+        }//end alternative sendMessage method
 
     }//end ClientThread class
 
