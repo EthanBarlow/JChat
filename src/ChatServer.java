@@ -140,23 +140,22 @@ Will handle all the message sending, receiving and processing
             for(String recipient: recipientSet)
             {
                 System.out.println("in for recipientSet loop");
-               // if(!recipient.equals(sender))//don't send this message to the sender
-                try
-                {
-                    System.out.println("In try block");
-                    Socket partner = (Socket) USERMAP.get(recipient);
-                    PrintWriter partnerOut = new PrintWriter(partner.getOutputStream(), true);
-                    partnerOut.println(sender + " : " + message);
-                    System.out.println("In sendMessage method " +sender + ": " + message);
-                }
-                catch (IOException e)
-                {
-                    System.out.println("In catch block");
-                    e.printStackTrace();
-                    System.out.println("The message from " + sender + " could not be sent to " + recipient);
-                }
-                System.out.println("end of for loop");
-            }
+               if(!recipient.equals(userName))//don't send this message to the sender
+               {
+                   try {
+                       System.out.println("In try block");
+                       Socket partner = (Socket) USERMAP.get(recipient);
+                       PrintWriter partnerOut = new PrintWriter(partner.getOutputStream(), true);
+                       partnerOut.println(sender + " : " + message);
+                       System.out.println("In sendMessage method " + sender + ": " + message);
+                   } catch (IOException e) {
+                       System.out.println("In catch block");
+                       e.printStackTrace();
+                       System.out.println("The message from " + sender + " could not be sent to " + recipient);
+                   }
+                   System.out.println("end of for loop");
+               }//end if statement
+            }//end for loop
             System.out.println("end of sendMessage method");
         }
 
