@@ -65,6 +65,7 @@ Will handle all the message sending, receiving and processing
 
         public void run()
         {
+            loadCommands();
             System.out.println("In clientThread run method");
             //testing for a username
             while(true)
@@ -86,7 +87,7 @@ Will handle all the message sending, receiving and processing
             sendMessage(userName, "@server", "\n\n--------Welcome to JChat!--------\nTo " +
                     "send a message to someone use the following format:\n\"@username/message\"\nand " +
                     "for multi-user message:\n\"@username/@username/...usernames.../message\"\n\n" +
-                    "If you need help, type \"*help\" "+"Have fun!");
+                    "If you need help, type \"#help\" "+"Have fun!");
 
             //alert the other users that this particular user is now online
             sendMessage(USERMAP.keySet(), "@server", userName + " is now available to chat!");
@@ -102,7 +103,7 @@ Will handle all the message sending, receiving and processing
                 //processing the message
                 String[] msgParts = msg.split("/");
 
-                if(msgParts[0].contains("*")) //checks for a server command
+                if(msgParts[0].contains("#")) //checks for a server command
                     processCommands(msgParts);
 
                 else
@@ -204,27 +205,41 @@ Will handle all the message sending, receiving and processing
 
      private void loadCommands() //this method loads the names of server commands into the set
      {
-            COMMANDS.put("*allUsers", "Lists all of the users that are online and ready to chat.");
-            COMMANDS.put("*exit", "Disconnects from the chat server and clears the session history.");
-            COMMANDS.put("*about", "This program was designed and created by Ethan Barlow. \n You can find more of my projects on my website: https://ethanbarlow.github.io/");
-            COMMANDS.put("*help", "Gives a list of commands that the server will accept and their corresponding descriptions.");
-            COMMANDS.put("*all", "Sends your message to everyone who is online. \n Format: *all/message");
+            COMMANDS.put("#allUsers", "Lists all of the users that are online and ready to chat.");
+            COMMANDS.put("#exit", "Disconnects from the chat server and clears the session history.");
+            COMMANDS.put("#about", "This program was designed and created by Ethan Barlow. \n You can find more of my projects on my website: https://ethanbarlow.github.io/");
+            COMMANDS.put("#help", "Gives a list of commands that the server will accept and their corresponding descriptions.\nOnly one command can be sent at a time and must precede the message.");
+            COMMANDS.put("#all", "Sends your message to everyone who is online. \n Format: #all/message");
      }
 
      private void processCommands(String[] msgPieces)
      {
-         if(msgPieces[0].equals("*allUsers"))
+         //sendMessage(getUserName(),"@server", "In the processCommands method");
+
+         if(msgPieces[0].contains("#allUsers"))
              listUsers();
-         else if(msgPieces[0].equals("*exit"))
-             sendMessage(getUserName(), "@server","*quit");
-         else if(msgPieces[0].equals("*about"))
-             sendMessage(getUserName(), "@server", COMMANDS.get("*about"));
-         else if(msgPieces[0].equals("*help"))
+         else if(msgPieces[0].contains("#exit"))
+             sendMessage(getUserName(), "@server","#quit");
+         else if(msgPieces[0].contains("#about"))
+             sendMessage(getUserName(), "@server", COMMANDS.get("#about"));
+         else if(msgPieces[0].contains("#help"))
          {
-             System.out.println();
+             sendMessage(getUserName(),"@server", "Here is a list of the available server commands: ");
+             for(String str: COMMANDS.keySet())
+             {
+                 sendMessage(getUserName(), "", str);
+                 sendMessage(getUserName(), "", "\t"+COMMANDS.get(str));
+             }
          }
-             //sendMessage(getUserName(), "@server");
-     }
+        else if(msgPieces[0].contains("#all"))
+         {
+             sendMessage(USERMAP.keySet(), getUserName(), msgPieces[1]);
+         }
+
+         else
+             sendMessage(getUserName(),"@server", "!!!That is not a valid command.!!!");
+
+     }//end processCommands method
 
     }//end ClientThread class
 
