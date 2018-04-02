@@ -4,9 +4,6 @@ This is the chat server class that will setup all connections with clients
 This class needs the following attributes:
     ServerSocket - to listen for new connections
     Map<String, Socket>
-
-
-
  */
 
 import com.sun.deploy.util.SessionState;
@@ -19,7 +16,8 @@ import java.util.*;
 
 public class ChatServer
 {
-     private static final Map<String, Socket> USERMAP = new HashMap<>(); // will hold the usernames as the key, and the ClientThread object as the value
+    private static final Map<String, Socket> USERMAP = new HashMap<>(); // will hold the usernames as the key, and the ClientThread object as the value
+    private static final Map<String, String> COMMANDS = new HashMap<>(); //will hold the commands that the server recognizes as the key, and the corresponding descriptions
 
     //this main method will run the ChatServer
     public static void main(String[] a)
@@ -86,9 +84,9 @@ Will handle all the message sending, receiving and processing
             USERMAP.put(userName, client);
 
             sendMessage(userName, "@server", "\n\n--------Welcome to JChat!--------\nTo " +
-                    "send a message to someone use the following format:\n\"@username%message\"\nand " +
-                    "for multiuser message:\n\"@username%@username%...usernames...%message\"\n\n" +
-                    "Have fun!");
+                    "send a message to someone use the following format:\n\"@username/message\"\nand " +
+                    "for multi-user message:\n\"@username/@username/...usernames.../message\"\n\n" +
+                    "If you need help, type \"*help\" "+"Have fun!");
 
             //alert the other users that this particular user is now online
             sendMessage(USERMAP.keySet(), "@server", userName + " is now available to chat!");
@@ -102,30 +100,38 @@ Will handle all the message sending, receiving and processing
                 msg = in.nextLine();
 
                 //processing the message
-                String[] msgParts = msg.split("%");
-                //the last element in msgParts should contain the actual message
-                for (String s:msgParts) {
-                    System.out.println(s);
-                }
+                String[] msgParts = msg.split("/");
 
-                Set<String> recipient = new HashSet<String>();
-                for(String user: msgParts)
+                if(msgParts[0].contains("*")) //checks for a server command
+                    processCommands(msgParts);
+
+                else
                 {
-                    if(USERMAP.containsKey(user))
-                        recipient.add(user);
-                    System.out.println(user);
+                    //the last element in msgParts should contain the actual message
+                    for (String s : msgParts) {
+                        System.out.println(s);
+                    }
+
+                    Set<String> recipient = new HashSet<String>();
+                    for (String user : msgParts) {
+                        if (USERMAP.containsKey(user))
+                            recipient.add(user);
+                        System.out.println(user);
+                    }
+                    for (String s : recipient)
+                        System.out.println(s);
+
+                    System.out.println("username " + userName);
+                    System.out.println(msgParts[msgParts.length - 1]);
+
+                    sendMessage(recipient, userName, msgParts[msgParts.length - 1]);
+
+                    System.out.println("still in the loop..." + msg);
                 }
-                for(String s: recipient)
-                    System.out.println(s);
-
-                System.out.println("username " + userName);
-                System.out.println(msgParts[msgParts.length-1]);
-
-                sendMessage(recipient, userName, msgParts[msgParts.length-1]);
-
-                System.out.println("still in the loop..." + msg);
             }
         }//end run method
+
+        private String getUserName(){return userName;}
 
         /**
          * This method will loop through the recipientSet to send a message to each user in the set.
@@ -163,7 +169,7 @@ Will handle all the message sending, receiving and processing
 
     private void sendMessage(String recip, String sender, String message)
         {
-            System.out.println("In alternatice send message before any processing");
+            System.out.println("In alternative send message before any processing");
             PrintWriter tempWrite;
 
             try
@@ -194,6 +200,30 @@ Will handle all the message sending, receiving and processing
                  allUsers+= "\t" + str + "\n";
          }
          sendMessage(userName, "@server", allUsers);
+     }
+
+     private void loadCommands() //this method loads the names of server commands into the set
+     {
+            COMMANDS.put("*allUsers", "Lists all of the users that are online and ready to chat.");
+            COMMANDS.put("*exit", "Disconnects from the chat server and clears the session history.");
+            COMMANDS.put("*about", "This program was designed and created by Ethan Barlow. \n You can find more of my projects on my website: https://ethanbarlow.github.io/");
+            COMMANDS.put("*help", "Gives a list of commands that the server will accept and their corresponding descriptions.");
+            COMMANDS.put("*all", "Sends your message to everyone who is online. \n Format: *all/message");
+     }
+
+     private void processCommands(String[] msgPieces)
+     {
+         if(msgPieces[0].equals("*allUsers"))
+             listUsers();
+         else if(msgPieces[0].equals("*exit"))
+             sendMessage(getUserName(), "@server","*quit");
+         else if(msgPieces[0].equals("*about"))
+             sendMessage(getUserName(), "@server", COMMANDS.get("*about"));
+         else if(msgPieces[0].equals("*help"))
+         {
+             System.out.println();
+         }
+             //sendMessage(getUserName(), "@server");
      }
 
     }//end ClientThread class

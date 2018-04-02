@@ -78,6 +78,4 @@ public class ChatClient
         }//end run method
     }//end KeyboardThenSend class
 
-
-
-}
+}//end ChatClient class
