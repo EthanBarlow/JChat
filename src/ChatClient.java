@@ -1,3 +1,8 @@
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
+
+import java.io.File;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
@@ -51,7 +56,17 @@ public class ChatClient
             while(true)
             {
                 msgFromServer=serverInput.nextLine();
-                System.out.println(msgFromServer);
+                if(msgFromServer.contains("#quit"))
+                {
+                    System.out.println("Thank you for using JChat! Have a nice day!");
+                    System.exit(0);
+                }
+                else
+                    System.out.println(msgFromServer);
+                new JFXPanel();
+                Media sound = new Media(new File("Resources/received.mp3").toURI().toString());
+                MediaPlayer mp = new MediaPlayer(sound);
+                mp.play();
             }//end while loop
         }
     }//end ServerResponse class
@@ -74,6 +89,10 @@ public class ChatClient
             {
                 String msgToSend=keyboard.nextLine();
                 lineToServer.println(msgToSend);
+                new JFXPanel();
+                Media sound = new Media(new File("Resources/sent.mp3").toURI().toString());
+                MediaPlayer mp = new MediaPlayer(sound);
+                mp.play();
             }//end while loop
         }//end run method
     }//end KeyboardThenSend class

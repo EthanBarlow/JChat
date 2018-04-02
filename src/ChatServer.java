@@ -219,7 +219,14 @@ Will handle all the message sending, receiving and processing
          if(msgPieces[0].contains("#allUsers"))
              listUsers();
          else if(msgPieces[0].contains("#exit"))
-             sendMessage(getUserName(), "@server","#quit");
+         {
+             sendMessage(getUserName(), "@server", "#quit");
+             this.in.close();
+             this.out.close();
+             try {this.client.close();}
+             catch (IOException e) {e.printStackTrace();}
+             this.interrupt();
+         }
          else if(msgPieces[0].contains("#about"))
              sendMessage(getUserName(), "@server", COMMANDS.get("#about"));
          else if(msgPieces[0].contains("#help"))
@@ -233,7 +240,7 @@ Will handle all the message sending, receiving and processing
          }
         else if(msgPieces[0].contains("#all"))
          {
-             sendMessage(USERMAP.keySet(), getUserName(), msgPieces[1]);
+             sendMessage(USERMAP.keySet(), getUserName(), "(To all)" + msgPieces[1]);
          }
 
          else
