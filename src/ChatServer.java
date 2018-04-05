@@ -144,9 +144,14 @@ Will handle all the message sending, receiving and processing
                         else
                             message=message.substring(0,message.length()-2)+")";
                         sendMessage(recipient, userName, message);
+                        //sends the message back to the user so that it displays correctly in the textarea
+                        sendMessage(userName, userName, message);
                     }
                     else//one recipient
+                    {
                         sendMessage(recipient, userName, msgParts[msgParts.length - 1]);
+                        sendMessage(userName, userName, msgParts[msgParts.length-1]);
+                    }
 
                     System.out.println("still in the loop..." + msg);
                 }
