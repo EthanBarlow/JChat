@@ -1,4 +1,5 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,8 +12,10 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.Scanner;
@@ -27,6 +30,8 @@ public class ChatClient extends Application
     private TextArea messages;
     private TextArea typeArea;
     private Button send;
+    private Socket server;
+    private Stage ps;
 
     public static void main(String[] a)
     {
@@ -37,6 +42,7 @@ public class ChatClient extends Application
     public void start(Stage primaryStage) throws Exception
     {
 
+        ps=primaryStage;
         messages = new TextArea();
         messages.setEditable(false);
         typeArea = new TextArea();
@@ -47,7 +53,7 @@ public class ChatClient extends Application
             String message="";
 
             //the socket object that will connect to the server
-            Socket server = new Socket("148.137.223.190", 4336);
+            server = new Socket("148.137.223.190", 4336);
             //sends messages out to the server, use true as a parameter to make sure that the stream auto-flushes
             PrintWriter out = new PrintWriter(server.getOutputStream(), true);
             //receives messages from the server
@@ -56,11 +62,12 @@ public class ChatClient extends Application
             Scanner keyboard = new Scanner(System.in);
 
             ServerResponse sr = new ServerResponse(input);
-            KeyboardThenSend kts = new KeyboardThenSend(keyboard,out);
 
-            send.setOnAction(new EventHandler<ActionEvent>(){
+            send.setOnAction(new EventHandler<ActionEvent>()
+            {
                 @Override
-                public void handle(ActionEvent event) {
+                public void handle(ActionEvent event)
+                {
                     String txt = "";
                     txt = typeArea.getText();
                     typeArea.clear();
@@ -82,9 +89,23 @@ public class ChatClient extends Application
         root.setCenter(msgCenter);
 
         Scene sc = new Scene(root);
-        primaryStage.setScene(sc);
-        primaryStage.show();
-    }
+        ps.setScene(sc);
+        if(server.isConnected())//if the server is not running the client will shutdown
+            ps.show();
+
+        ps.setOnCloseRequest(new EventHandler<WindowEvent>()
+        {
+            @Override
+            public void handle(WindowEvent event)
+            {
+                try {server.close();}
+                catch (IOException e) {e.printStackTrace();}
+                System.exit(0);
+                ps.close();
+            }
+        });
+
+    }//end start method
 
     //Two classes that extend the Thread class: one for server input, one for keyboard input and for client output
 
@@ -104,9 +125,12 @@ public class ChatClient extends Application
             while(true)
             {
                 msgFromServer=serverInput.nextLine();
-                if(msgFromServer.contains("#quit"))
+                if(msgFromServer.contains("#exit"))
                 {
                     System.out.println("Thank you for using JChat! Have a nice day!");
+                    try {server.close();}
+                    catch (IOException e) {e.printStackTrace();}
+
                     System.exit(0);
                 }
                 if(msgFromServer!=null)
@@ -114,38 +138,13 @@ public class ChatClient extends Application
                     messages.appendText(msgFromServer+"\n");
                     System.out.println(msgFromServer);
                 }
-                /*new JFXPanel();
-                Media sound = new Media(new File("Resources/received.mp3").toURI().toString());
+                /*new JFXPanel();*/
+                /*Media sound = new Media(new File("Resources/received.mp3").toURI().toString());
                 MediaPlayer mp = new MediaPlayer(sound);
                 mp.play();*/
             }//end while loop
         }
     }//end ServerResponse class
 
-    //This class will handle keyboard input and sending messages
-    private static class KeyboardThenSend extends Thread
-    {
-        Scanner keyboard;
-        PrintWriter lineToServer;
-        private KeyboardThenSend(Scanner i, PrintWriter pw)
-        {
-            keyboard=i;
-            lineToServer=pw;
-            this.start();
-        }//end constructor
-
-        public void run()
-        {
-            while(true)
-            {
-                String msgToSend=keyboard.nextLine();
-                lineToServer.println(msgToSend);
-                new JFXPanel();
-                Media sound = new Media(new File("Resources/sent.mp3").toURI().toString());
-                MediaPlayer mp = new MediaPlayer(sound);
-                mp.play();
-            }//end while loop
-        }//end run method
-    }//end KeyboardThenSend class
 
 }//end ChatClient class
