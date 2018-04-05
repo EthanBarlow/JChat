@@ -70,12 +70,17 @@ Will handle all the message sending, receiving and processing
             //testing for a username
             while(true)
             {
-                out.println("Please enter a username starting with '@': ");
+                out.println("Please enter a username starting with '@' (max length: 30 characters): ");
+
+                if(client.isClosed())
+                {
+                    USERMAP.remove(userName);
+                    this.interrupt();
+                    System.out.println("Stopping client socket now");
+                }
+
                 userName = in.nextLine();
-                /*userName must not already be in the map, and the userName must contain "@".
-                It cannot == "@" or contain "@server" (
-                this is reserved for messages that the server itself will send to clients)*/
-                if (!USERMAP.keySet().contains(userName) && userName.contains("@") && !userName.equals("@") && !userName.contains("@server"))
+                if (validUsername(userName))
                     break;
 
                 out.println("Invalid username...");
@@ -125,12 +130,66 @@ Will handle all the message sending, receiving and processing
                     System.out.println("username " + userName);
                     System.out.println(msgParts[msgParts.length - 1]);
 
-                    sendMessage(recipient, userName, msgParts[msgParts.length - 1]);
+                    //if a message is sent to more than one person, then append a message listing the recipients
+                    if(msgParts.length>2)
+                    {
+                        String message=msgParts[msgParts.length-1];
+                        message += " (also sent to: ";
+                        int i=0;
+                        for(;i<msgParts.length-2; i++)//loops through all but the last recipient adding them to the list of recipients
+                            if(!msgParts[i].contains(userName))//excludes the sender from the list
+                                message+=msgParts[i]+", ";
+                        if(!msgParts[i].contains(userName))
+                            message+=msgParts[i]+")";//adds the last user
+                        else
+                            message=message.substring(0,message.length()-2)+")";
+                        sendMessage(recipient, userName, message);
+                    }
+                    else//one recipient
+                        sendMessage(recipient, userName, msgParts[msgParts.length - 1]);
 
                     System.out.println("still in the loop..." + msg);
                 }
+
+                if(client.isClosed())
+                {
+                    USERMAP.remove(userName);
+                    System.out.println("Stopping client socket now");
+                    this.interrupt();
+                }
             }
         }//end run method
+
+        private boolean validUsername(String user)
+        {
+            if(user.length()<2)
+                return false;
+
+            if(user.length()>30)
+                return false;
+
+            if(user.contains(" "))
+                return false;
+
+            if(user.charAt(0)!='@')
+                return false;
+
+            if(user.substring(1,user.length()).contains("@"))
+                return false;
+
+            for(String s: COMMANDS.keySet())
+                if(user.contains(s))
+                    return false;
+
+            for(String s: USERMAP.keySet())
+                if(s.contains(user))
+                    return false;
+
+            if(user.contains("@server"))
+                return false;
+
+            return true;
+        }
 
         private String getUserName(){return userName;}
 
