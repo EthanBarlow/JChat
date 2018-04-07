@@ -53,7 +53,7 @@ public class ChatClient extends Application
             String message="";
 
             //the socket object that will connect to the server
-            server = new Socket("148.137.223.190", 4336);
+            server = new Socket(/*"148.137.223.190"*/"148.137.141.18", 4336);
             //sends messages out to the server, use true as a parameter to make sure that the stream auto-flushes
             PrintWriter out = new PrintWriter(server.getOutputStream(), true);
             //receives messages from the server
@@ -125,7 +125,7 @@ public class ChatClient extends Application
             while(true)
             {
                 msgFromServer=serverInput.nextLine();
-                if(msgFromServer.contains("#exit"))
+                if(msgFromServer.equals("#exit"))
                 {
                     System.out.println("Thank you for using JChat! Have a nice day!");
                     try {server.close();}

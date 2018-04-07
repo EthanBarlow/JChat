@@ -282,7 +282,7 @@ Will handle all the message sending, receiving and processing
 
          if(msgPieces[0].contains("#allUsers"))
              listUsers();
-         else if(msgPieces[0].contains("#exit"))
+         else if(msgPieces[0].equals("#exit"))
          {
              sendMessage(getUserName(), "@server", "#exit");
              sendMessage(USERMAP.keySet(), "@server", getUserName()+" has left the chat. (To all)");
