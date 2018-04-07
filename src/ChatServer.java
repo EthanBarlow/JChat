@@ -284,7 +284,7 @@ Will handle all the message sending, receiving and processing
              listUsers();
          else if(msgPieces[0].equals("#exit"))
          {
-             sendMessage(getUserName(), "@server", "#exit");
+             sendMessage(getUserName(), "@server", "#exitNOW"+"exitNOW".hashCode());
              sendMessage(USERMAP.keySet(), "@server", getUserName()+" has left the chat. (To all)");
              try {this.client.close();}
              catch (IOException e) {e.printStackTrace();}

@@ -114,23 +114,27 @@ public class ChatClient extends Application
 
         });
 
-        send.setOnKeyTyped(new EventHandler<KeyEvent>()
+        typeArea.setOnKeyPressed(new EventHandler<KeyEvent>()
         {
 
             @Override
             public void handle(KeyEvent event)
             {
                 if(event.getCode()== KeyCode.ENTER)
+                {
+                    System.out.println("YOU pressed enter");
                     sendMessage();
+                    typeArea.setText("");
+                }
 
             }
         });
     }
 
-    private void sendMessage()
+    public void sendMessage()
     {
         String txt = typeArea.getText();
-        typeArea.clear();
+        //typeArea.clear();
         out.println(txt);
         messages.appendText(txt+"\n");
     }
