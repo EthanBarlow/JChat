@@ -8,6 +8,7 @@ import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.BorderPane;
@@ -85,6 +86,8 @@ public class ChatClient extends Application
         if(server.isConnected())//if the server is not running the client will shutdown
             ps.show();
 
+        ps.getIcons().add(new Image("file:Resources/SmileLogo.png"));
+        ps.setTitle("JChat");
         hookupEvents();
         typeArea.requestFocus();
 
@@ -106,7 +109,6 @@ public class ChatClient extends Application
             {
                 if(event.getCode()== KeyCode.ENTER)
                 {
-                    System.out.println("YOU pressed enter");
                     sendMessage();
                     typeArea.setText("");
                 }
@@ -132,11 +134,9 @@ public class ChatClient extends Application
         txt=txt.substring(0,txt.length()-1);
         //typeArea.clear();
         out.println(txt);
-        messages.appendText(txt+"\n");
+        //messages.appendText(txt+"\n");
         messages.positionCaret(messages.getText().length());
     }
-
-    //Two classes that extend the Thread class: one for server input, one for keyboard input and for client output
 
     //This class will handle received messages from the server
     private class ServerResponse extends Thread
@@ -169,10 +169,6 @@ public class ChatClient extends Application
                     messages.appendText(msgFromServer+"\n");
                     System.out.println(msgFromServer);
                 }
-                /*new JFXPanel();*/
-                /*Media sound = new Media(new File("Resources/received.mp3").toURI().toString());
-                MediaPlayer mp = new MediaPlayer(sound);
-                mp.play();*/
             }//end while loop
         }
     }//end ServerResponse class
