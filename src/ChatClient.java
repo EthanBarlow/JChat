@@ -1,5 +1,7 @@
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -31,7 +33,6 @@ public class ChatClient extends Application
     private Scanner input;
     private TextArea messages;
     private TextArea typeArea;
-    private Button send;
     private Socket server;
     private Stage ps;
     private PrintWriter out;
@@ -48,17 +49,16 @@ public class ChatClient extends Application
         ps=primaryStage;
         messages = new TextArea();
         messages.setEditable(false);
+        messages.setWrapText(true);
         typeArea = new TextArea();
-        send = new Button("Send");
+
 
         try
         {
-            String message="";
+            //String message="";
 
             //the socket object that will connect to the server
-            server = new Socket(/*"148.137.223.190"*/"148.137.141.18", 4336);
-
-
+            server = new Socket("148.137.223.190"/*"148.137.141.18"*/, 4336);
         }
 
         catch (Exception e)
@@ -77,7 +77,7 @@ public class ChatClient extends Application
 
         BorderPane root = new BorderPane();
         VBox msgCenter = new VBox();
-        msgCenter.getChildren().addAll(messages, typeArea, send);
+        msgCenter.getChildren().addAll(messages, typeArea);
         root.setCenter(msgCenter);
 
         Scene sc = new Scene(root);
@@ -86,35 +86,19 @@ public class ChatClient extends Application
             ps.show();
 
         hookupEvents();
+        typeArea.requestFocus();
 
         ps.setOnCloseRequest(new EventHandler<WindowEvent>()
         {
             @Override
-            public void handle(WindowEvent event)
-            {
-                /*try {server.close();}
-                catch (IOException e) {e.printStackTrace();}
-                System.exit(0);
-                ps.close();*/
-                out.println("#exit");
-            }
+            public void handle(WindowEvent event) {out.println("#exit");}
         });
 
     }//end start method
 
     public void hookupEvents()
     {
-        send.setOnAction(new EventHandler<ActionEvent>()
-        {
-            @Override
-            public void handle(ActionEvent event)
-            {
-                sendMessage();
-            }
-
-        });
-
-        typeArea.setOnKeyPressed(new EventHandler<KeyEvent>()
+        typeArea.setOnKeyReleased(new EventHandler<KeyEvent>()
         {
 
             @Override
@@ -129,14 +113,27 @@ public class ChatClient extends Application
 
             }
         });
+
+        //setting up the autoscroll feature
+        messages.textProperty().addListener(new ChangeListener<String>()
+        {
+            @Override
+            public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue)
+            {
+                messages.setScrollTop(Double.MAX_VALUE);
+            }
+        });
+
     }
 
     public void sendMessage()
     {
         String txt = typeArea.getText();
+        txt=txt.substring(0,txt.length()-1);
         //typeArea.clear();
         out.println(txt);
         messages.appendText(txt+"\n");
+        messages.positionCaret(messages.getText().length());
     }
 
     //Two classes that extend the Thread class: one for server input, one for keyboard input and for client output
