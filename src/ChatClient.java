@@ -2,11 +2,15 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -30,13 +34,15 @@ This is the ChatClient class that will be run by the user and will be the interf
  */
 public class ChatClient extends Application
 {
+    private Socket server;
+    private PrintWriter out;
     private String USERNAME="";
     private Scanner input;
     private TextArea messages;
     private TextArea typeArea;
-    private Socket server;
     private Stage ps;
-    private PrintWriter out;
+    private ListView<String> viewOnline;
+    private ObservableList<String> onlineUsersList;
 
     public static void main(String[] a)
     {
@@ -47,6 +53,13 @@ public class ChatClient extends Application
     public void start(Stage primaryStage) throws Exception
     {
 
+        Label lblUsers = new Label("Online Users:");
+        lblUsers.setStyle("-fx-font-size: 16px; -fx-font-family: Impact;");
+        onlineUsersList = FXCollections.observableArrayList();
+        viewOnline= new ListView<>();
+        viewOnline.setItems(onlineUsersList);
+
+
         ps=primaryStage;
         messages = new TextArea();
         messages.setEditable(false);
@@ -56,8 +69,6 @@ public class ChatClient extends Application
 
         try
         {
-            //String message="";
-
             //the socket object that will connect to the server
             server = new Socket("148.137.223.190"/*"148.137.141.18"*/, 4336);
         }
@@ -78,8 +89,11 @@ public class ChatClient extends Application
 
         BorderPane root = new BorderPane();
         VBox msgCenter = new VBox();
+        VBox vbOnline = new VBox();
         msgCenter.getChildren().addAll(messages, typeArea);
+        vbOnline.getChildren().addAll(lblUsers,viewOnline);
         root.setCenter(msgCenter);
+        root.setRight(vbOnline);
 
         Scene sc = new Scene(root);
         ps.setScene(sc);
@@ -132,9 +146,7 @@ public class ChatClient extends Application
     {
         String txt = typeArea.getText();
         txt=txt.substring(0,txt.length()-1);
-        //typeArea.clear();
         out.println(txt);
-        //messages.appendText(txt+"\n");
         messages.positionCaret(messages.getText().length());
     }
 
@@ -166,10 +178,67 @@ public class ChatClient extends Application
                 }
                 if(msgFromServer!=null)
                 {
+
+                    //checking to see if a new user has been added
+                    if(msgFromServer.startsWith("@server : @") && msgFromServer.endsWith("is now available to chat!"))
+                    {
+                        updateUserList(msgFromServer, 'a');
+                    }
+
+                    else if(msgFromServer.contains("\t@") && !msgFromServer.contains("/") && !msgFromServer.contains("@server") && !msgFromServer.contains(":"))
+                    {
+                        updateUserList(msgFromServer,'m');
+                    }
+
+                    else if(msgFromServer.startsWith("@server : @") && msgFromServer.endsWith("has left the chat. (To all)"))//@server : @jake has left the chat. (To all)
+
+                    {
+                        updateUserList(msgFromServer, 'r');
+                    }
+
                     messages.appendText(msgFromServer+"\n");
                     System.out.println(msgFromServer);
                 }
             }//end while loop
+        }
+
+        //m is the String that should be added or removed and type is a char that will determine which procedure to follow
+        private void updateUserList(String m, char type)
+        {
+            //adding one user to the "Online Users" list
+            if(type=='a')
+            {
+                String[] parts = m.split("@");
+                String[] user = parts[2].split(" ");
+                onlineUsersList.add("@"+user[0]);
+                Platform.runLater(new Runnable() {@Override public void run() {viewOnline.setItems(onlineUsersList);}});
+                System.out.println(onlineUsersList.toArray());
+            }
+
+            /*adding all users to the "Online Users" list --- mainly used when a new user logs in and needs to see
+            all the active users currently online*/
+            else if(type=='m')
+            {
+                System.out.println("In the updateUserList method where multiple people will be added to the list view");
+                System.out.println(m + " in user list");
+                System.out.println("After printing all the users");
+                if(!onlineUsersList.contains(m.substring(1,m.length())))
+                    onlineUsersList.add(m.substring(1,m.length()));
+                Platform.runLater(new Runnable() {@Override public void run() {viewOnline.setItems(onlineUsersList);}});
+                System.out.println(onlineUsersList.toArray());
+            }
+
+            /*removing a user from the "Online Users" list. When someone leaves the chat.*/
+            else if(type=='r')
+            {
+                System.out.println("In the updateUserList method where users are removed.");
+                String[] parts = m.split("@");
+                String[] user = parts[2].split(" ");
+                onlineUsersList.remove("@"+user[0]);
+                Platform.runLater(new Runnable() {@Override public void run() {viewOnline.setItems(onlineUsersList);}});
+                System.out.println(onlineUsersList.toArray());
+            }
+
         }
     }//end ServerResponse class
 

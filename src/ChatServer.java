@@ -52,8 +52,7 @@ Will handle all the message sending, receiving and processing
         private String userName; //the username of the client that this ClientThread is interacting with
 
         /*Constructor taking in a Socket object.
-            The map will be used to send a list of online users
-        */
+            The map will be used to send a list of online users*/
         public ClientThread(Socket s) throws Exception
         {
             System.out.println("In clientThread constructor");
@@ -278,8 +277,6 @@ Will handle all the message sending, receiving and processing
 
      private void processCommands(String[] msgPieces)
      {
-         //sendMessage(getUserName(),"@server", "In the processCommands method");
-
          if(msgPieces[0].contains("#allUsers"))
              listUsers();
          else if(msgPieces[0].equals("#exit"))
