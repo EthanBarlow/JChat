@@ -244,3 +244,27 @@ public class ChatClient extends Application
 
 
 }//end ChatClient class
+
+/*
+Protocol:
+
+First, the Socket representing the server tries to make a connection to the server at the designated ip address on the specific port number.
+When the sendMessage() method is called, the text from the input box is taken.
+The text is then shortened in order to remove the newline character.
+That text is then sent out to the server.
+The messages box is then scrolled down to show all the most recent messages.
+
+A separate class is then made that extends the Thread class. This is used for receiving messages from the server
+and printing them out to the GUI. This class extends the Thread class so that messages can be sent and received
+at the same time without having to wait for one to happen before the other.
+
+The exit command from the server will cause the client to shutdown, but the command is obscure so that another
+user cannot send the exit command to you and shutdown your client.
+
+Messages starting with "@server : @" and ending with "is now available to chat!" updates the ListView of users.
+The type of update depends on the char passed in to the method.
+'a' - adds a single user
+'m' - adds multiple users
+'r' - removes multiple users
+
+ */

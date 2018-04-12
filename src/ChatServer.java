@@ -312,3 +312,39 @@ Will handle all the message sending, receiving and processing
 
 
 }//end class main
+
+/*
+Protocol:
+
+In the main method there is a while true loop waiting for connections from clients.
+Then, a socket object is created and passed into the ClientThread class.
+The server, first, requires a valid username from the client.
+Once a valid username is entered the socket client will be added to a map.
+After some initial welcome messages and directions, the ClientThread then enters a while true loop and listens for messages.
+Then, the message is processed and appropriate actions are taken.
+
+Commands to the server start with "#", any message containing "#" is then sent to the processCommands method. The
+corresponding procedures are then followed. If the message containing "#" is not a valid command, the server send back
+a message notifying the user that the command is not valid.
+
+Sending a message from one client to another is taken care of in the sendMessage method:
+- Messages will only be sent to recipients other than the sender.
+- The recipient then receives a message in the following format:
+    username: message
+
+Usernames are required to start with "@"
+Multiple recipients should be separated with "/"
+And the message itself should be separated from the users in the same way
+
+Message strings are split up into an array of Strings. The splitting up is based on the "/"
+
+So, @drlu/How are you? is split into
+    @drlu
+    How are you?
+
+Then, "How are you?" is sent to the user, @drlu
+The recipient then sees a message like this
+    @ethan: How are you?
+
+ */
+
